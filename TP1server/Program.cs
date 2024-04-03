@@ -41,6 +41,7 @@ class Server
         writer.AutoFlush = true;
 
         // resposta "100 OK" quando inicialmente contatado
+
         writer.WriteLine("100 OK");
 
         string message = reader.ReadLine();
@@ -84,7 +85,7 @@ class Server
         }
         else
         {
-            // resposta de erro
+            // resposta em caso de erro
 
             return "500 ERROR: Comando não reconhecido";
         }
@@ -102,7 +103,7 @@ class Server
 
     class Task
     {
-        public string Description { get; set; }
+        public string Description { get; set; } // descricao da tarefa
         public string State { get; set; } // opcoes: concluída, em curso ou não alocada
         public string AssignedClient { get; set; } // ID do cliente 
     }
