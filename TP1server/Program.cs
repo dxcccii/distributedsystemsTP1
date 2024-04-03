@@ -91,14 +91,43 @@ class Server
         }
     }
 
-    static void LoadServices()
+    static void LoadServicesFromCSV()
     {
-        // codigo para importar os serviços e tarefas a partir dos ficheiros CSV do SIDE
+        try
+        {
+            string[] files = Directory.GetFiles("Caminho_do_Diretório_CSV", "*.csv");
+            foreach (string file in files)
+            {
+                string serviceName = Path.GetFileNameWithoutExtension(file);
+                List<Task> tasks = new List<Task>();
+                using (StreamReader sr = new StreamReader(file))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        string[] fields = line.Split(',');
+                        if (fields.Length >= 2)
+                        {
+                            string taskDescription = fields[0];
+                            string taskState = fields[1];
+                            Task task = new Task { Description = taskDescription, State = taskState };
+                            tasks.Add(task);
+                        }
+                    }
+                }
+                services.Add(serviceName, tasks);
+            }
+            Console.WriteLine("Serviços carregados com sucesso.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erro ao carregar serviços: " + ex.Message);
+        }
     }
 
     static void LoadClientAllocations()
     {
-        // codigo para importar os clientes e atribuir-lhes os serviços a partir dos ficheiros CSV do SIDE
+        // codigo para a alocação de clientes do ficheiro CSV para serviços
     }
 
     class Task
