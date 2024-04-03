@@ -8,4 +8,4 @@
                       ,d8,   ,d8b,,dP  ,dP"Y8,  ,d8,_    _,d8,_    _,d8,_    __,88,__,88,_
                       P"Y8888P"Y88"  dP"   "Y88P""Y8888PPP""Y8888PPP""Y8888PP8P""Y88P""Y8 
                                                                 
-            UTAD // COMPUTER SCIENCE // INTRODUCTION TO DATA SCIENCE // BY "FYODOR" RIBEIRO // AL66766 
+                UTAD // COMPUTER SCIENCE // DISTRIBUTED SYSTEMS // BY "FYODOR" RIBEIRO // AL66766 
