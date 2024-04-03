@@ -13,7 +13,7 @@ class Server
 
     static void Main(string[] args)
     {
-        LoadServices();
+        LoadServicesFromCSV();
         LoadClientAllocations();
 
         TcpListener server = new TcpListener(IPAddress.Any, 1234);
@@ -63,7 +63,7 @@ class Server
         else if (message.StartsWith("CLIENT_ID:", StringComparison.OrdinalIgnoreCase))
         {
             // por codigo para atribuir o ID do cliente
-           
+
             return "ID_CONFIRMED";
         }
         else if (message.StartsWith("TASK_COMPLETED:", StringComparison.OrdinalIgnoreCase))
