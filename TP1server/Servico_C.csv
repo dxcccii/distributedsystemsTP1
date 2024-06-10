@@ -1,0 +1,4 @@
+TarefaID,Descricao,Estado,ClienteID
+SC_T1,Entregar encomenda n22 Av. Europa, Concluido,Cl_0006
+SC_T2,Distribuir as contas absurdas de electricidade,Em curso,Cl_0006
+SC_T3,Fechar os correios 30min antes da hora de fecho,Nao alocada

@@ -1,0 +1,145 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\documentclass[12pt]{article}
+\usepackage[UTF8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[scaled]{helvet}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tabularx}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{comment}
+\usepackage{hyperref}
+\usepackage[justification=centering]{caption}
+\DeclareMathOperator{\sech}{sech}
+\DeclareMathOperator{\arcosh}{arcosh}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{pdfpages}
+\author{dxcccii}
+
+\renewcommand\familydefault{\sfdefault}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{titlepage} % Suppresses displaying the page number on the title page and the subsequent page counts as page 1
+	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for horizontal lines, change thickness here
+	
+	\center % Centre everything on the page
+	
+%------------------------------------------------
+%Headings
+%------------------------------------------------
+	
+	\textsc{\LARGE UNIVERSIDADE TRAS OS MONTES E ALTO DOURO}\\[1.5cm] % Main heading such as the name of your university/college
+	
+	\textsc{\Large engenharia informática}\\[0.5cm] % Major heading such as course name
+	
+	\textsc{\large SISTEMAS DISTRIBUIDOS}\\[0.5cm] % Minor heading such as course title
+	
+%------------------------------------------------
+%Title	
+%------------------------------------------------
+	
+	\HRule\\[0.4cm]
+	
+	{\huge\bfseries TRABALHO PRACTICO 1\\ 
+	\hfill \\
+	SERVIDOR DE GESTÃO DE SERVIÇOS DE MOBILIDADE}\\[0.4cm] % Title of your document
+	
+	\HRule\\[1.5cm]
+	
+%------------------------------------------------
+%Author(s)	
+%------------------------------------------------
+	
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushleft}
+			{\Large
+			\textsc{autor}}\\
+			 {\large Raquel Ribeiro\\ al66766@utad.eu\\Turma Pratica 1} % Your name
+		\end{flushleft}
+	\end{minipage}
+	~
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushright}
+			\Large
+			\textsc{docentes}\\
+			{\large Prof. Hugo Paredes\\ Prof. Tiago Pinto }
+		\end{flushright}
+	\end{minipage}
+%------------------------------------------------
+%Date & illustration
+%------------------------------------------------
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=12cm]{ilustracaocapa}
+\end{figure}
+	
+	\vfill\vfill\vfill % Position the date 3/4 down the remaining page
+	
+	{\large\today} % Date, change the \today to a set date if you want to be precise
+	
+%------------------------------------------------
+%Logo
+%------------------------------------------------
+	
+	%\vfill\vfill
+	%\includegraphics[width=0.2\textwidth]{placeholder.jpg}\\[1cm] % Include a department/university logo - this will require the graphicx package
+	 
+	%----------------------------------------------------------------------------------------
+	
+	\vfill % Push the date up 1/4 of the remaining page
+	
+\end{titlepage}
+
+%------------------------------------------------
+% INDEX & TABLE OF CONTENTS
+
+
+%\textsc{\tableofcontents}
+
+%\newpage
+
+
+% INTRODUCTION
+%------------------------------------------------
+\section{// PROTOCOLO DE COMUNICAÇÃO}
+O protocolo de comunicação entre o cliente e o servidor é definido por uma série de comandos trocados através de uma conexão TCP.\\
+
+\noindent As principais mensagens e os seus propósitos do lado do cliente sao:
+\begin{itemize}
+  \item CONNECT: Inicia a ligação do cliente com o servidor.
+  \item CLIENT ID:[id]: O cliente envia esta mensagem para se identificar ao servidor. so-called bullet.
+  \item REQUEST TASK CLIENT ID:[id]: O cliente solicita uma nova tarefa.
+  \item TASK COMPLETED: [descrição da tarefa]: O cliente informa o servidor que uma tarefa foi concluída.
+  \item REQUEST SERVICE CLIENT ID:[id]: O cliente solicita um serviço.
+  \item SAIR: O cliente informa o servidor que deseja desconectar-se.
+\end{itemize}
+
+\noindent No lado do servidor, as mensagens de resposta ao cliente sao:  
+\begin{itemize}
+  \item 100 OK: Ligação estabelecida.
+  \item 400 BYE: O servidor reconhece o pedido de desconexão do cliente.
+  \item 500 ERROR: [mensagem de erro]: O servidor encontrou um erro.
+  \item ID CONFIRMED:[id]: O servidor confirma o ID do cliente.
+  \item SERVICE ALLOCATED:[serviço]: O servidor atribui um serviço ao cliente.
+  \item TASK ALLOCATED:[descrição da tarefa]: O servidor atribui uma tarefa ao cliente.
+  \item NO SERVICE AVAILABLE: Não há serviços disponíveis para o cliente.
+  \item NO TASKS AVAILABLE: Não há tarefas disponíveis.
+  \item TASK MARKED COMPLETED: Tarefa marcada como concluída.
+\end{itemize}
+
+
+
+\end{document}

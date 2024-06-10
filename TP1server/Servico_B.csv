@@ -1,0 +1,4 @@
+TarefaID,Descricao,Estado,ClienteID
+SB_T1,Praticar na banda as 21:00 e nao deixar ninguem na Av. Europa dormir, Concluido,Cl_0004
+SB_T2,Levar um paciente em coma alcoolico na paragem Av. Aureliano Barrigas para o hospital,Em curso,Cl_0005
+SB_T3,Resgatar gato que caiu do 6 andar,Em curso,Cl_0004
