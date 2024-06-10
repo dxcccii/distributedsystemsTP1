@@ -1,60 +1,51 @@
-﻿using System; // Basic .NET types and utilities
-using System.Collections.Generic; // Provides generic collection classes
-using System.IO; // Input/output operations
-using System.Linq; // LINQ (Language-Integrated Query) for querying data
-using System.Net; // Networking support
-using System.Net.Sockets; // TCP/IP socket communication
-using System.Threading; // Threading and synchronization primitives
+﻿using System; // Provides fundamental types and basic functions
+using System.Collections.Generic; // Provides generic collection classes and interfaces
+using System.IO; // Provides classes for reading and writing to files and streams
+using System.Linq; // Provides LINQ (Language Integrated Query) extension methods
+using System.Net; // Provides networking functionality, such as working with IP addresses and sockets
+using System.Net.Sockets; // Provides classes for working with sockets
+using System.Threading; // Provides threading and synchronization primitives
 
 class Servidor
 {
-    // Dictionary to store client services
+    // Dictionaries to store services and tasks
     private static Dictionary<string, string> serviceDict = new Dictionary<string, string>();
-
-    // Dictionary to store tasks assigned to clients
     private static Dictionary<string, List<string>> taskDict = new Dictionary<string, List<string>>();
-
-    // Mutex to ensure thread safety when accessing shared resources
+    // Mutex for thread synchronization
     private static Mutex mutex = new Mutex();
 
-    // Main method
     static void Main(string[] args)
     {
         // Print the current working directory
         PrintWorkingDirectory();
-
-        // Load data from CSV files into dictionaries
+        // Load tasks from CSV file
         LoadDataFromCSV();
 
-        // Start TCP listener
         TcpListener servidor = null;
-
         try
         {
-            // Initialize and start the TCP listener
+            // Start TCP server
             servidor = new TcpListener(IPAddress.Any, 1234);
             servidor.Start();
             Console.WriteLine("Servidor iniciado. Aguardando conexões...");
 
-            // Accept and handle client connections indefinitely
+            // Accept incoming client connections
             while (true)
             {
-                // Accept incoming client connections
                 TcpClient cliente = servidor.AcceptTcpClient();
                 Console.WriteLine("Cliente conectado!");
-
-                // Delegate each client connection to a worker thread for concurrent handling
+                // Handle each client connection in a separate thread
                 ThreadPool.QueueUserWorkItem(HandleClient, cliente);
             }
         }
         catch (SocketException ex)
         {
-            // Handle socket-related exceptions
+            // Handle socket exceptions
             Console.WriteLine("Erro de Socket: " + ex.ToString());
         }
         finally
         {
-            // Ensure that the TCP listener is stopped when exiting the server loop
+            // Stop the server when done
             if (servidor != null)
             {
                 servidor.Stop();
@@ -62,37 +53,31 @@ class Servidor
         }
     }
 
-    // Method to handle individual client connections
     private static void HandleClient(object obj)
     {
+        // Handle each client connection
         TcpClient cliente = (TcpClient)obj;
-
         try
         {
-            // Set up streams for reading from and writing to the client
+            // Open network stream for reading and writing
             using (NetworkStream stream = cliente.GetStream())
             using (StreamReader leitor = new StreamReader(stream))
-            using (StreamWriter escritor = new StreamWriter(stream)
-            {
-                AutoFlush = true
-            })
+            using (StreamWriter escritor = new StreamWriter(stream) { AutoFlush = true })
             {
                 string mensagem;
-
-                // Continuously read messages from the client
+                // Read messages from client
                 while ((mensagem = leitor.ReadLine()) != null)
                 {
                     Console.WriteLine("Mensagem recebida: " + mensagem);
-                    // Process the received message and generate a response
+                    // Process each message and generate a response
                     string resposta = ProcessMessage(mensagem);
-                    // Send the response back to the client
                     escritor.WriteLine(resposta);
                 }
             }
         }
         catch (IOException ex)
         {
-            // Handle I/O-related exceptions
+            // Handle IO exceptions
             Console.WriteLine("Erro de E/S: " + ex.ToString());
         }
         catch (Exception ex)
@@ -102,7 +87,7 @@ class Servidor
         }
         finally
         {
-            // Close the client connection when done
+            // Close client connection
             if (cliente != null)
             {
                 cliente.Close();
@@ -110,171 +95,100 @@ class Servidor
         }
     }
 
-    // Method to process messages received from clients
-    // Process the incoming message and generate a response
     private static string ProcessMessage(string message)
     {
         try
         {
-            // Check the type of message and perform corresponding actions
+            // Process each message type
             if (message.StartsWith("CONNECT", StringComparison.OrdinalIgnoreCase))
             {
-                return "100 OK"; // Respond with OK status
+                // Handle CONNECT message
+                return "100 OK";
             }
             else if (message.StartsWith("CLIENT_ID:", StringComparison.OrdinalIgnoreCase))
             {
-                // Extract client ID from the message and confirm
+                // Handle CLIENT_ID message
                 string clientId = message.Substring("CLIENT_ID:".Length).Trim();
-                // Validate clientId if necessary
-                Console.WriteLine( "Received CLIENT_ID: {clientId}");
-                return "ID_CONFIRMED:{clientId}"; // Confirm client ID
+                Console.WriteLine($"Received CLIENT_ID: {clientId}");
+                return $"ID_CONFIRMED:{clientId}";
             }
             else if (message.StartsWith("TASK_COMPLETED:", StringComparison.OrdinalIgnoreCase))
             {
-                // Extract task description from the message and mark it as completed
+                // Handle TASK_COMPLETED message
                 string taskDescription = message.Substring("TASK_COMPLETED:".Length).Trim();
-                return MarkTaskAsCompleted(taskDescription); // Mark task as completed
+                return MarkTaskAsCompleted(taskDescription);
             }
             else if (message.StartsWith("REQUEST_SERVICE CLIENT_ID:", StringComparison.OrdinalIgnoreCase))
             {
-                // Extract client ID from the message and allocate a service
+                // Handle REQUEST_SERVICE message
                 string clientId = message.Substring("REQUEST_SERVICE CLIENT_ID:".Length).Trim();
-                return AllocateService(clientId); // Allocate service to the client
+                return AllocateService(clientId);
             }
             else if (message.StartsWith("REQUEST_TASK CLIENT_ID:", StringComparison.OrdinalIgnoreCase))
             {
-                // Extract client ID from the message and allocate a task
+                // Handle REQUEST_TASK message
                 string clientId = message.Substring("REQUEST_TASK CLIENT_ID:".Length).Trim();
-                return AllocateTask(clientId); // Allocate task to the client
+                return AllocateTask(clientId);
             }
             else if (message.Equals("SAIR", StringComparison.OrdinalIgnoreCase))
             {
-                return "400 BYE"; // Respond with goodbye message
+                // Handle SAIR message
+                return "400 BYE";
             }
             else
             {
-                return "500 ERROR: Comando não reconhecido"; // Unknown command
+                // Handle unrecognized message
+                return "500 ERROR: Comando não reconhecido";
             }
         }
         catch (Exception ex)
         {
-            // Log any exceptions that occur during message processing
-            Console.WriteLine("Error processing message: {ex}");
-            return "500 ERROR: Internal server error"; // Internal server error
+            // Handle processing errors
+            Console.WriteLine($"Error processing message: {ex}");
+            return "500 ERROR: Internal server error";
         }
     }
 
-    // Method to load data from CSV files into dictionaries
-    // Method to print the current working directory
+    // Print current working directory
     private static void PrintWorkingDirectory()
     {
         string workingDirectory = Environment.CurrentDirectory;
         Console.WriteLine("Current Working Directory: " + workingDirectory);
     }
 
-    // Method to load data from CSV files into dictionaries
+    // Load tasks from CSV file
     private static void LoadDataFromCSV()
     {
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        string serviceFilePath = Path.Combine(baseDir, "Alocacao_Cliente_Servico.csv");
         string taskFilePath = Path.Combine(baseDir, "Servico_A.csv");
 
         try
         {
-            // Load services from the service CSV file
-            if (File.Exists(serviceFilePath))
-            {
-                foreach (var line in File.ReadLines(serviceFilePath).Skip(1))
-                {
-                    var parts = line.Split(',');
-                    if (parts.Length == 2)
-                    {
-                        // Add service information to the service dictionary
-                        serviceDict[parts[0].Trim()] = parts[1].Trim();
-                    }
-                }
-                Console.WriteLine("Serviços carregados com sucesso."); // Success message
-            }
-            else
-            {
-                Console.WriteLine("Erro: Arquivo {serviceFilePath} não encontrado."); // Error message
-            }
-
-            // Load tasks
-
-            // Load services from the specified CSV file
-            if (File.Exists(serviceFilePath))
-            {
-                // Read each line in the service file, skipping the header (first line)
-                foreach (var line in File.ReadLines(serviceFilePath).Skip(1))
-                {
-                    // Split the line into parts based on comma delimiter
-                    var parts = line.Split(',');
-                    // Ensure that the line has exactly two parts (service ID and service description)
-                    if (parts.Length == 2)
-                    {
-                        // Trim whitespace and add service information to the service dictionary
-                        serviceDict[parts[0].Trim()] = parts[1].Trim();
-                    }
-                }
-                Console.WriteLine("Serviços carregados com sucesso."); // Success message
-            }
-            else
-            {
-                // Display an error message if the service file is not found
-                Console.WriteLine("Erro: Arquivo {serviceFilePath} não encontrado.");
-            }
-
-            // Load tasks
-
-            // Load services from the specified CSV file
-            if (File.Exists(serviceFilePath))
-            {
-                // Read each line in the service file, skipping the header (first line)
-                foreach (var line in File.ReadLines(serviceFilePath).Skip(1))
-                {
-                    // Split the line into parts based on comma delimiter
-                    var parts = line.Split(',');
-                    // Ensure that the line has exactly two parts (service ID and service description)
-                    if (parts.Length == 2)
-                    {
-                        // Trim whitespace and add service information to the service dictionary
-                        serviceDict[parts[0].Trim()] = parts[1].Trim();
-                    }
-                }
-                Console.WriteLine("Serviços carregados com sucesso."); // Success message
-            }
-            else
-            {
-                // Display an error message if the service file is not found
-                Console.WriteLine("Erro: Arquivo {serviceFilePath} não encontrado.");
-            }
-
-            // Load tasks from the specified CSV file
+            // Load tasks from CSV file
             if (File.Exists(taskFilePath))
             {
-                // Read each line in the task file, skipping the header (first line)
+                // Clear existing task dictionary
+                taskDict.Clear();
+
+                // Read each line in the task file
                 foreach (var line in File.ReadLines(taskFilePath).Skip(1))
                 {
-                    // Split the line into parts based on comma delimiter
+                    // Split the line into parts
                     var parts = line.Split(',');
-                    // Ensure that the line has exactly four parts (task ID, description, status, and client ID)
-                    if (parts.Length == 4)
+                    // Ensure the line has at least three parts
+                    if (parts.Length >= 3)
                     {
-                        // Extract task ID, description, and client ID
+                        // Extract task ID, description, and status
                         var taskId = parts[0].Trim();
                         var taskDescription = parts[1].Trim();
-                        var clientId = parts[3].Trim(); // Assuming ClientID is in the fourth column
-                                                        // Check if the client ID is empty, indicating an unassigned task
-                        if (string.IsNullOrEmpty(clientId))
+                        var taskStatus = parts[2].Trim();
+
+                        // Add task to the task dictionary
+                        if (!taskDict.ContainsKey(taskId))
                         {
-                            // Add the task description to the task dictionary under the corresponding task ID
-                            if (!taskDict.ContainsKey(taskId))
-                            {
-                                taskDict[taskId] = new List<string>();
-                            }
-                            taskDict[taskId].Add(taskDescription);
+                            taskDict[taskId] = new List<string>();
                         }
+                        taskDict[taskId].Add(taskDescription);
                     }
                 }
                 Console.WriteLine("Tarefas carregadas com sucesso."); // Success message
@@ -282,72 +196,133 @@ class Servidor
             else
             {
                 // Display an error message if the task file is not found
-                Console.WriteLine("Erro: Arquivo {taskFilePath} não encontrado.");
+                Console.WriteLine($"Erro: Arquivo {taskFilePath} não encontrado.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Erro ao carregar dados dos arquivos CSV: {ex.Message}");
+            // Handle loading data errors
+            Console.WriteLine($"Erro ao carregar dados dos arquivos CSV: {ex.Message}");
         }
     }
 
-    // Method to allocate service to a client
+    // Allocate service to a client
     private static string AllocateService(string clientId)
     {
         if (serviceDict.ContainsKey(clientId))
         {
-            // If the service for the client exists in the dictionary, allocate it
+            // Allocate service to client
             string service = serviceDict[clientId];
-            Console.WriteLine("Alocando serviço '{service}' para o cliente {clientId}");
+            Console.WriteLine($"Alocando serviço '{service}' para o cliente {clientId}");
             return "SERVICE_ALLOCATED:" + service;
         }
         else
         {
-            // If no service is available for the client, return a message indicating that
+            // No service available for client
             return "NO_SERVICE_AVAILABLE";
         }
     }
 
-    // Method to allocate a task to a client
+    // Update task status in CSV file
+    private static void UpdateTaskCSV(string taskId, string newStatus, string clientId)
+    {
+        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        string taskFilePath = Path.Combine(baseDir, "Servico_A.csv");
+
+        if (File.Exists(taskFilePath))
+        {
+            var lines = File.ReadAllLines(taskFilePath).ToList();
+            for (int i = 1; i < lines.Count; i++) // Start from index 1 to skip the header line
+            {
+                var parts = lines[i].Split(',');
+                if (parts.Length >= 3 && parts[0].Trim() == taskId)
+                {
+                    parts[2] = newStatus;
+                    if (parts.Length >= 4)
+                    {                        // Update client ID if available
+                        parts[3] = clientId;
+                    }
+                    else
+                    {
+                        // Add client ID field if it doesn't exist
+                        Array.Resize(ref parts, parts.Length + 1);
+                        parts[3] = clientId;
+                    }
+                    lines[i] = string.Join(",", parts);
+                    File.WriteAllLines(taskFilePath, lines);
+                    Console.WriteLine($"Tarefa '{taskId}' atualizada para '{newStatus}' com cliente '{clientId}' no arquivo CSV.");
+                    return; // Exit the loop after updating the task
+                }
+            }
+            Console.WriteLine($"Tarefa '{taskId}' não encontrada no arquivo CSV.");
+        }
+        else
+        {
+            // Handle file not found error
+            Console.WriteLine($"Erro: Arquivo {taskFilePath} não encontrado.");
+        }
+    }
+
+    // Check if a task is allocated to any client
+    private static bool IsTaskAllocated(string taskId)
+    {
+        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        string taskFilePath = Path.Combine(baseDir, "Servico_A.csv");
+
+        if (File.Exists(taskFilePath))
+        {
+            var lines = File.ReadLines(taskFilePath).Skip(1);
+            foreach (var line in lines)
+            {
+                var parts = line.Split(',');
+                if (parts.Length == 4 && parts[0].Trim() == taskId && !string.IsNullOrEmpty(parts[3].Trim()))
+                {
+                    // Task is allocated to a client
+                    return true;
+                }
+            }
+        }
+
+        // Task is not allocated to any client
+        return false;
+    }
+
+    // Allocate task to a client
     private static string AllocateTask(string clientId)
     {
-        mutex.WaitOne(); // Acquire mutex lock to ensure thread safety
+        mutex.WaitOne(); // Acquire mutex lock for thread safety
         try
         {
-            // Check if there are unallocated tasks
+            // Check for unallocated tasks
             var unallocatedTasks = taskDict.Where(pair => pair.Value.Count > 0).ToList();
             if (unallocatedTasks.Any())
             {
-                // Get the first unallocated task and allocate it to the client
-                var taskPair = unallocatedTasks.First();
-                var taskId = taskPair.Key;
-                var taskDescription = taskPair.Value.First();
-
-                // Remove the allocated task from the task dictionary
-                taskPair.Value.RemoveAt(0);
-
-                Console.WriteLine("Alocando tarefa não alocada '{taskDescription}' para o cliente {clientId}");
-                return "TASK_ALLOCATED:" + taskDescription;
-            }
-            else
-            {
-                // If no unallocated tasks are available, check if there are tasks assigned to the specific client
-                if (taskDict.ContainsKey(clientId) && taskDict[clientId].Count > 0)
+                foreach (var taskPair in unallocatedTasks)
                 {
-                    // Get the first available task for the client and allocate it
-                    var taskDescription = taskDict[clientId][0];
-                    // Remove the allocated task from the task dictionary
-                    taskDict[clientId].RemoveAt(0);
+                    var taskId = taskPair.Key;
+                    var taskDescriptions = taskPair.Value;
 
-                    Console.WriteLine("Alocando tarefa '{taskDescription}' para o cliente {clientId}");
+                    // Check if any of the task descriptions are already allocated to a client
+                    bool taskAllocated = taskDescriptions.Any(description => IsTaskAllocated(taskId, description));
+                    if (taskAllocated)
+                    {
+                        continue; // Skip this task and check the next one
+                    }
+
+                    // Update the allocated task to the new user ID responsible for it
+                    var newStatus = "Em curso";
+                    UpdateTaskCSV(taskId, newStatus, clientId);
+
+                    // Get the first unallocated task description
+                    var taskDescription = taskDescriptions.First();
+
+                    Console.WriteLine($"Alocando tarefa não alocada '{taskDescription}' para o cliente {clientId}");
                     return "TASK_ALLOCATED:" + taskDescription;
                 }
-                else
-                {
-                    // If no tasks are available for the client, return a message indicating that
-                    return "NO_TASKS_AVAILABLE";
-                }
             }
+
+            // If no unallocated tasks are available or all tasks are already allocated, return a message indicating that
+            return "NO_TASKS_AVAILABLE";
         }
         finally
         {
@@ -355,52 +330,91 @@ class Servidor
         }
     }
 
-    // Method to mark a task as completed
+    // Check if a task with a specific description is allocated to any client
+    private static bool IsTaskAllocated(string taskId, string taskDescription)
+    {
+        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        string taskFilePath = Path.Combine(baseDir, "Servico_A.csv");
+
+        if (File.Exists(taskFilePath))
+        {
+            var lines = File.ReadLines(taskFilePath).Skip(1);
+            foreach (var line in lines)
+            {
+                var parts = line.Split(',');
+                if (parts.Length == 4 && parts[0].Trim() == taskId && parts[1].Trim() == taskDescription && !string.IsNullOrEmpty(parts[3].Trim()))
+                {
+                    // Task is allocated to a client
+                    return true;
+                }
+            }
+        }
+
+        // Task is not allocated to any client
+        return false;
+    }
+
+    // Check if a task with a specific description is marked as completed
+    private static bool IsTaskCompleted(string taskDescription)
+    {
+        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        string taskFilePath = Path.Combine(baseDir, "Servico_A.csv");
+
+        if (File.Exists(taskFilePath))
+        {
+            var lines = File.ReadAllLines(taskFilePath).Skip(1);
+            foreach (var line in lines)
+            {
+                var parts = line.Split(',');
+                if (parts.Length == 4 && parts[1].Trim().Equals(taskDescription.Trim(), StringComparison.OrdinalIgnoreCase) && parts[2].Trim().Equals("Concluido", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Task is marked as completed
+                    return true;
+                }
+            }
+        }
+
+        // Task is not marked as completed
+        return false;
+    }
+
+    // Mark a task with a specific description as completed
     private static string MarkTaskAsCompleted(string taskDescription)
     {
         try
         {
-            // Logic to mark the task as completed (e.g., updating a database or a list)
-            Console.WriteLine("Tarefa '{taskDescription}' marcada como concluída.");
-
-            // Write the updated task information back to the CSV file
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string taskFilePath = Path.Combine(baseDir, "Servico_A.csv");
 
-            Console.WriteLine("Task file path: {taskFilePath}");
-
             if (File.Exists(taskFilePath))
             {
-                // Read all lines from the CSV file
                 var lines = File.ReadAllLines(taskFilePath);
-                for (int i = 1; i < lines.Length; i++) // Start from index 1 to skip the header line
+                for (int i = 1; i < lines.Length; i++)
                 {
                     var parts = lines[i].Split(',');
                     if (parts.Length == 4 && parts[1].Trim().Equals(taskDescription.Trim(), StringComparison.OrdinalIgnoreCase))
                     {
-                        // Update the task status to "Concluído" if the task description matches
+                        // Update task status to "Concluido"
                         parts[2] = "Concluido";
-                        // Join the parts back into a line and update the CSV file
                         lines[i] = string.Join(",", parts);
                         File.WriteAllLines(taskFilePath, lines);
-                        Console.WriteLine("Tarefa '{taskDescription}' atualizada como concluída no arquivo CSV.");
+                        Console.WriteLine($"Tarefa '{taskDescription}' marcada como concluída.");
                         return "TASK_MARKED_COMPLETED";
                     }
                 }
             }
             else
             {
-                // If the CSV file doesn't exist, log an error message
-                Console.WriteLine("Erro: Arquivo {taskFilePath} não encontrado.");
+                // Handle file not found error
+                Console.WriteLine($"Erro: Arquivo {taskFilePath} não encontrado.");
             }
 
-            // If the task description is not found, return a message indicating that
-            return "TASK_NOT_FOUND";
+            return "TASK_NOT_FOUND"; // Task with the provided description not found
         }
         catch (Exception ex)
         {
-            // If an exception occurs during the marking process, log the error message
-            Console.WriteLine("Erro ao marcar tarefa como concluída: {ex.Message}");
+            // Handle error when marking task as completed
+            Console.WriteLine($"Erro ao marcar tarefa como concluída: {ex.Message}");
             return "500 ERROR: Internal server error";
         }
     }

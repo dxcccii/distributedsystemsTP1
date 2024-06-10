@@ -2,6 +2,7 @@
 using System.Diagnostics;      // Provides classes for interacting with system processes
 using System.IO;               // Provides classes for reading and writing to files
 using System.Net.Sockets;      // Provides classes for creating TCP/IP client and server applications
+using System.Threading;        // Provides classes for threading, including Thread.Sleep
 
 class Cliente
 {
@@ -29,6 +30,7 @@ class Cliente
                     escritor.WriteLine("CONNECT");
                     string resposta = leitor.ReadLine();
                     Console.WriteLine("Resposta do servidor: " + resposta); // Server response
+                    Thread.Sleep(1000); // Add a delay of 1 second
 
                     // If the connection was successfully established, request and send the client ID
                     if (resposta == "100 OK")
@@ -42,6 +44,7 @@ class Cliente
                         // Receive confirmation from the server
                         resposta = leitor.ReadLine();
                         Console.WriteLine("Resposta " + resposta); // Server response
+                        Thread.Sleep(1000); // Add a delay of 1 second
 
                         if (resposta.StartsWith("ID_CONFIRMED"))
                         {
@@ -60,6 +63,7 @@ class Cliente
                                     escritor.WriteLine("REQUEST_TASK CLIENT_ID:" + idCliente);
                                     resposta = leitor.ReadLine();
                                     Console.WriteLine("Resposta do servidor: " + resposta); // Server response
+                                    Thread.Sleep(1000); // Add a delay of 1 second
 
                                     if (resposta.StartsWith("TASK_ALLOCATED"))
                                     {
@@ -79,6 +83,7 @@ class Cliente
                                     escritor.WriteLine("TASK_COMPLETED: " + descricaoTarefa);
                                     resposta = leitor.ReadLine();
                                     Console.WriteLine("Resposta do servidor: " + resposta); // Server response
+                                    Thread.Sleep(1000); // Add a delay of 1 second
                                 }
                                 else if (opcao == "3")
                                 {
@@ -86,7 +91,8 @@ class Cliente
                                     escritor.WriteLine("SAIR");
                                     resposta = leitor.ReadLine();
                                     Console.WriteLine("Resposta do servidor: " + resposta); // Server response
-                                    break;
+                                    Thread.Sleep(1000); // Add a delay of 1 second
+                                    break; // Break out of the loop after receiving server response
                                 }
                                 else
                                 {
@@ -97,6 +103,7 @@ class Cliente
                     }
                 }
                 Console.WriteLine("Comunicação com o servidor encerrada."); // Communication with server ended message
+                break; // Exit the while loop to end the client
             }
         }
         catch (IOException ex)
@@ -106,6 +113,11 @@ class Cliente
         catch (Exception ex)
         {
             Console.WriteLine("Ocorreu um erro: " + ex.Message); // An error occurred message
+        }
+        finally
+        {
+            // Ensure the console window closes when execution is complete
+            Environment.Exit(0);
         }
     }
 }
