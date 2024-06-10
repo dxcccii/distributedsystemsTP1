@@ -10,7 +10,7 @@ class Servidor
 {
     private static Dictionary<string, string> serviceDict = new Dictionary<string, string>();
     private static Dictionary<string, List<string>> taskDict = new Dictionary<string, List<string>>();
-    private static object lockObject = new object();
+    private static Mutex mutex = new Mutex();
 
     static void Main(string[] args)
     {
@@ -195,8 +195,6 @@ class Servidor
         }
     }
 
-
-
     private static string AllocateService(string clientId)
     {
         if (serviceDict.ContainsKey(clientId))
@@ -213,7 +211,8 @@ class Servidor
 
     private static string AllocateTask(string clientId)
     {
-        lock (lockObject)
+        mutex.WaitOne();
+        try
         {
             // Check if there are unallocated tasks
             var unallocatedTasks = taskDict.Where(pair => pair.Value.Count > 0).ToList();
@@ -248,6 +247,10 @@ class Servidor
                     return "NO_TASKS_AVAILABLE";
                 }
             }
+        }
+        finally
+        {
+            mutex.ReleaseMutex();
         }
     }
 
@@ -294,8 +297,4 @@ class Servidor
             return "500 ERROR: Internal server error";
         }
     }
-
-
-
 }
-
