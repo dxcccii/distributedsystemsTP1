@@ -1,64 +1,113 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
 
-class Client
+class Cliente
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Bem-vindo a ServiMoto!");
+        Console.WriteLine("Bem-vindo à ServiMoto!");
 
-        // pedir endereço IP do servidor
+        // Pedir endereço IP do servidor
         Console.Write("Por favor, insira o endereço IP do servidor: ");
-        string serverIP = Console.ReadLine();
+        string enderecoServidor = Console.ReadLine();
+
 
         try
         {
-            // conectar ao servidor
-
-            TcpClient client = new TcpClient(serverIP, 1234);
-            NetworkStream stream = client.GetStream();
-            StreamReader reader = new StreamReader(stream);
-            StreamWriter writer = new StreamWriter(stream);
-            writer.AutoFlush = true;
-
-            // enviar mensagem CONNECT para iniciar a comunicação
-
-            writer.WriteLine("CONNECT");
-            Console.WriteLine("Conectado ao servidor. Aguardando resposta...");
-
-            // receber a resposta do servidor
-
-            string response = reader.ReadLine();
-            Console.WriteLine("Resposta do servidor: " + response);
-
-            // se a conexão foi estabelecida com sucesso, solicitar e enviar o ID do cliente
-
-            if (response == "100 OK")
+            while (true) // Keep the client running indefinitely
             {
-                Console.Write("Por favor, insira seu ID de cliente: ");
-                string clientID = Console.ReadLine();
+                // Conectar ao servidor
+                using (TcpClient cliente = new TcpClient(enderecoServidor, 1234))
+                using (NetworkStream stream = cliente.GetStream())
+                using (StreamReader leitor = new StreamReader(stream))
+                using (StreamWriter escritor = new StreamWriter(stream) { AutoFlush = true })
+                {
+                    Console.WriteLine("Conectado ao servidor. Aguardando resposta...");
 
-                // enviar o ID do cliente para o servidor
+                    // Enviar mensagem CONNECT para iniciar a comunicação
+                    escritor.WriteLine("CONNECT");
+                    string resposta = leitor.ReadLine();
+                    Console.WriteLine("Resposta do servidor: " + resposta);
 
-                writer.WriteLine("CLIENT_ID: " + clientID);
+                    // Se a conexão foi estabelecida com sucesso, solicitar e enviar o ID do cliente
+                    if (resposta == "100 OK")
+                    {
 
-                // receber confirmação do servidor
 
-                response = reader.ReadLine();
-                Console.WriteLine("Resposta do servidor: " + response);
+                        Console.Write("Por favor, insira o seu ID de cliente: ");
+                        string idCliente = Console.ReadLine();
+
+                        // Enviar o ID do cliente para o servidor
+                        escritor.WriteLine("CLIENT_ID:" + idCliente);
+
+                        // Receber confirmação do servidor
+                        resposta = leitor.ReadLine();
+                        Console.WriteLine("Resposta " + resposta);
+
+
+                        if (resposta.StartsWith("ID_CONFIRMED"))
+                        {
+                            while (true)
+                            {
+                                Console.WriteLine("1. Solicitar tarefa");
+                                Console.WriteLine("2. Marcar tarefa como concluída");
+                                Console.WriteLine("3. Sair");
+                                Console.Write("Escolha uma opção: ");
+                                string opcao = Console.ReadLine();
+
+                                if (opcao == "1")
+                                {
+                                    // Solicitar nova tarefa
+                                    escritor.WriteLine("REQUEST_TASK CLIENT_ID:" + idCliente);
+                                    resposta = leitor.ReadLine();
+                                    Console.WriteLine("Resposta do servidor: " + resposta);
+
+                                    if (resposta.StartsWith("TASK_ALLOCATED"))
+                                    {
+                                        string descricaoTarefa = resposta.Substring("TASK_ALLOCATED:".Length).Trim();
+                                        Console.WriteLine("Tarefa alocada: " + descricaoTarefa);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Não há tarefas disponíveis no momento.");
+                                    }
+                                }
+                                else if (opcao == "2")
+                                {
+                                    // Marcar tarefa como concluída
+                                    Console.Write("Por favor, insira a descrição da tarefa concluída: ");
+                                    string descricaoTarefa = Console.ReadLine();
+                                    escritor.WriteLine("TASK_COMPLETED: " + descricaoTarefa);
+                                    resposta = leitor.ReadLine();
+                                    Console.WriteLine("Resposta do servidor: " + resposta);
+                                }
+                                else if (opcao == "3")
+                                {
+                                    // Encerrar a comunicação
+                                    escritor.WriteLine("SAIR");
+                                    resposta = leitor.ReadLine();
+                                    Console.WriteLine("Resposta do servidor: " + resposta);
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Opção inválida. Por favor, tente novamente.");
+                                }
+                            }
+                        }
+                    }
+                }
+                Console.WriteLine("Comunicação com o servidor encerrada.");
             }
-
-            // encerrar a comunicação 
-
-            client.Close();
-            Console.WriteLine("Comunicação com o servidor encerrada.");
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine("Ocorreu um erro de E/S: " + ex.ToString());
         }
         catch (Exception ex)
         {
-            // mensagem de erro
-
             Console.WriteLine("Ocorreu um erro: " + ex.Message);
         }
     }
