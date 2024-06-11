@@ -12,6 +12,23 @@ ________________________________________________________________________________
               UTAD // COMPUTER SCIENCE // DISTRIBUTED SYSTEMS // BY "FYODOR" RIBEIRO // AL66766 
 
 __________________________________________________________________________________________________________________________
+                                                       
+                             o                        |              o             
+                                 _  _ _|_  ,_   __  __|         ___|_   __  _  _   
+                             |  / |/ | |  /  | /  \/  |  |   | /   | | /  \/ |/ |  
+                             |_/  |  |_/_/   |_|__/\_/|_/ \_/|_|___/_/_|__/  |  |_/
+ __________________________________________________________________________________________________________________________
+
+A Client/Server system that manages a client's tasks given a client ID. 
+The interactions between the client and the server create a task assignment system where clients can request tasks from the 
+server, mark tasks as completed, and end the communication when desired. The server is responsible for managing the 
+client's requests, allocating tasks, and maintaining control over the status of the tasks.
+
+The server can handle multiple clients at once by using different threads for each client. This system makes use of shared 
+resources and employs mutexes to ensure that concurrent access to shared resources is properly managed, preventing race 
+conditions and data corruption.
+ __________________________________________________________________________________________________________________________
+                                                       
                                   _  _                                                           
             o                    | || |       o                               |                  
                 _  _    ,_|_ __, | || | __,_|_   __  _  _      __,   _  _   __|            ,  _  
