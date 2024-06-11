@@ -1,0 +1,11 @@
+\babel@toc {portuguese}{}\relax 
+\contentsline {section}{\numberline {1}// INTRODUÇÃO}{2}{section.1}%
+\contentsline {section}{\numberline {2}// PROTOCOLO DE COMUNICAÇÃO}{2}{section.2}%
+\contentsline {section}{\numberline {3}// ATENDIMENTO E COMUNICAÇÃO COM OS CLIENTES}{3}{section.3}%
+\contentsline {section}{\numberline {4}// PARTILHA FICHEIROS E ATENDIMENTO SIMULTÂNEO DE CLIENTES}{5}{section.4}%
+\contentsline {section}{\numberline {5}// SERVIÇO DE GESTÃO}{7}{section.5}%
+\contentsline {section}{\numberline {6}// ANEXOS}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}// CLONE DO GITHUB}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}// CÓDIGO DO CLIENTE}{8}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}// CÓDIGO DO SERVIDOR}{11}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}// AVISO}{23}{subsection.6.4}%

@@ -172,26 +172,6 @@ class Servidor
         }
     }
 
-    // Method to extract the service ID from the message
-    private static string GetServiceIdFromMessage(string message)
-    {
-        // Extract the service ID from the message
-        // Here you need to implement the logic to extract the service ID from the message
-        // For example, if the message format is "TASK_COMPLETED: <serviceId> <taskDescription>"
-        // You can split the message and get the service ID from the second part
-        // Update this logic according to your message format
-        string[] parts = message.Split(' ');
-        if (parts.Length >= 3)
-        {
-            return parts[1].Trim();
-        }
-        else
-        {
-            // Return null or throw an exception if the service ID cannot be extracted
-            throw new ArgumentException("Service ID not found in the message.");
-        }
-    }
-
     private static string GetClientIdFromMessage(string message)
     {
         string[] parts = message.Split(':');
@@ -201,7 +181,6 @@ class Servidor
         }
         return string.Empty;
     }
-
 
     private static void PrintWorkingDirectory()
     {
@@ -501,25 +480,6 @@ class Servidor
         }
     }
 
-    private static string ProcessMarkTaskCompleted(string message, string clientId)
-    {
-        // Extrair a descrição da tarefa da mensagem
-        string[] parts = message.Split(':');
-        if (parts.Length >= 2)
-        {
-            string descricaoTarefa = parts[1].Trim();
-
-            // Chamar o método MarkTaskAsCompleted com o clientId
-            string resposta = MarkTaskAsCompleted(clientId, descricaoTarefa);
-
-            return resposta;
-        }
-        else
-        {
-            return "500 ERROR: Descrição da tarefa ausente.";
-        }
-    }
-
     private static string MarkTaskAsCompleted(string clientId, string taskDescription)
     {
         // Iterate through all services
@@ -559,6 +519,7 @@ class Servidor
                         }
 
                     }
+
                 }
                 else
                 {
@@ -577,6 +538,5 @@ class Servidor
         // Task description not found
         return "ERROR_TASK_NOT_FOUND";
     }
-
 
 }
