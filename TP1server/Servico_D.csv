@@ -1,0 +1,4 @@
+TarefaID,Descricao,Estado,ClienteID
+SD_T1,Entregar pizza 4 queiijos a n22 Av. Europa, Concluido,Cl_0006
+SD_T2,Entregar pizza veggie a n37 Rua S. Francisco de Assis,Em curso,Cl_0006
+SD_T3,Entregar 4 pizzas enchidos ao edificio da ECHS,Nao alocada
